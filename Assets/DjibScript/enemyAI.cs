@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public class enemyAI : MonoBehaviour
 {
-     public UnityEngine.AI.NavMeshAgent agent;
+    public NavMeshAgent agent;
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
 
@@ -16,26 +16,30 @@ public class enemyAI : MonoBehaviour
 
     [Header("Attack")]
     public float timeBetweenAttacks = 1.5f;
-    public GameObject projectile;
-    public Transform firePoint;
-    public float shootForce = 32f;
+    public float damage = 10f;
     bool alreadyAttacked;
 
     [Header("Ranges")]
-    public float sightRange = 15f;
-    public float attackRange = 10f;
+    public float sightRange = 10f;
+    public float attackRange = 2f;
     public bool playerInSightRange, playerInAttackRange;
 
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
     }
 
     void Update()
     {
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
+
+        // Debug logs for range checks
+        if (playerInSightRange)
+            Debug.Log(gameObject.name + ": Player in sight range!");
+        if (playerInAttackRange)
+            Debug.Log(gameObject.name + ": Player in attack range!");
 
         if (!playerInSightRange && !playerInAttackRange) Patrol();
         else if (playerInSightRange && !playerInAttackRange) Chase();
@@ -76,9 +80,13 @@ public class enemyAI : MonoBehaviour
 
         if (!alreadyAttacked)
         {
-            // 🔫 SHOOT
-            Rigidbody rb = Instantiate(projectile, firePoint.position, firePoint.rotation).GetComponent<Rigidbody>();
-            rb.AddForce(firePoint.forward * shootForce, ForceMode.Impulse);
+            // 💥 DAMAGE PLAYER
+            PlayerHealth health = player.GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(damage);
+                Debug.Log(gameObject.name + " attacked player for " + damage + " damage!");
+            }
 
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
@@ -88,5 +96,17 @@ public class enemyAI : MonoBehaviour
     void ResetAttack()
     {
         alreadyAttacked = false;
+    }
+
+    // Draw Gizmos for sight and attack ranges
+    private void OnDrawGizmosSelected()
+    {
+        // Sight range (yellow)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, sightRange);
+
+        // Attack range (red)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
