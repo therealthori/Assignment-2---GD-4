@@ -25,7 +25,7 @@ public class HealthBar: MonoBehaviour
             healthSlider.value = health;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.K))
         {
             takeDamage(10);
         }
