@@ -10,34 +10,36 @@ public class HealthBar: MonoBehaviour
     public float maxHealth = 100f;
     public float health;
     private float lerpSpeed = 0.05f;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
         health = maxHealth;
+        healthSlider.maxValue = maxHealth;
+        easeHealthSlider.maxValue = maxHealth;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (healthSlider.value != health)
-        {
             healthSlider.value = health;
-        }
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            takeDamage(10);
-        }
 
         if (healthSlider.value != easeHealthSlider.value)
-        {
             easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, health, lerpSpeed);
+    }
+
+    public void TakeDamage(float damage)   // ✅ Now public
+    {
+        health = Mathf.Max(health - damage, 0f);  // ✅ Clamps at 0, no negative health
+
+        if (health <= 0f)
+        {
+            PlayerDie();
         }
     }
 
-    void takeDamage(float damage)
+    void PlayerDie()
     {
-        health -= damage;
+        Debug.Log("Player is dead!");
+        // Add your game over / respawn logic here
     }
 }
