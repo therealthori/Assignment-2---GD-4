@@ -3342,9 +3342,11 @@ GameObject:
   - component: {fileID: 1164220876378467547}
   - component: {fileID: 7958203886654734620}
   - component: {fileID: 1399669532316160388}
+  - component: {fileID: 3761549295738890564}
+  - component: {fileID: 8222993074281099362}
   m_Layer: 0
   m_Name: enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3512,6 +3514,36 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &3761549295738890564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4799548673252156693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c62bbff4fbcb6af48815cc900c480dc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatController
+  health: 50
+  healthBar: {fileID: 2149819580249903802}
+--- !u!114 &8222993074281099362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4799548673252156693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38edad09d22ae74469130e3d541c7e92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  attackRange: 2
+  damageAmount: 10
+  attackCooldown: 2
+  player: {fileID: 0}
 --- !u!1 &4862052387714053128
 GameObject:
   m_ObjectHideFlags: 0

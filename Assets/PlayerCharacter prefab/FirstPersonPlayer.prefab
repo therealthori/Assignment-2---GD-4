@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 3463476040127067379}
   - component: {fileID: 2636082158768469036}
   - component: {fileID: 8461754995504475428}
+  - component: {fileID: 7987130311879380635}
   m_Layer: 0
   m_Name: FirstPersonPlayer
   m_TagString: Player
@@ -190,6 +191,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   isGrounded: 1
+--- !u!114 &7987130311879380635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7183583945314221487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4377f3dd160f09640a537d7f7cf2da29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollisionDetector
+  range: 3
+  knockbackForce: 5
+  damageAmount: 10
+  cam: {fileID: 4827845715037791046}
 --- !u!1 &8360349701786474769
 GameObject:
   m_ObjectHideFlags: 0

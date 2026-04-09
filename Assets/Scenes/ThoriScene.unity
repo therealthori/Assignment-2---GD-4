@@ -378,11 +378,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7183583945314221487, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
-      insertIndex: -1
+      insertIndex: 4
       addedObject: {fileID: 1027688731}
-    - targetCorrespondingSourceObject: {fileID: 7183583945314221487, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1027688736}
   m_SourcePrefab: {fileID: 100100000, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
 --- !u!4 &213260590 stripped
 Transform:
@@ -648,24 +645,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: enemy
       objectReference: {fileID: 0}
-    - target: {fileID: 4799548673252156693, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
-      propertyPath: m_TagString
-      value: Enemy
-      objectReference: {fileID: 0}
     - target: {fileID: 7217025607559642851, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8222993074281099362, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1027688740}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4799548673252156693, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1693193551}
-    - targetCorrespondingSourceObject: {fileID: 4799548673252156693, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1693193559}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
 --- !u!1 &838329372
 GameObject:
@@ -983,22 +974,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a6bb98bd6cee174a8f5b52657c44d9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
---- !u!114 &1027688736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1027688730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4377f3dd160f09640a537d7f7cf2da29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CollisionDetector
-  range: 3
-  knockbackForce: 5
-  damageAmount: 10
-  cam: {fileID: 213260593}
 --- !u!4 &1027688740 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
@@ -1222,52 +1197,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1669966180 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2149819580249903802, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
-  m_PrefabInstance: {fileID: 546951839}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a72f3b5ca5fd5d249b51bf1d612dfffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Health
---- !u!1 &1693193543 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4799548673252156693, guid: e3662175f6e5d8c4b92421f448b6ed2f, type: 3}
-  m_PrefabInstance: {fileID: 546951839}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1693193551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1693193543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c62bbff4fbcb6af48815cc900c480dc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CombatController
-  health: 50
-  healthBar: {fileID: 1669966180}
---- !u!114 &1693193559
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1693193543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38edad09d22ae74469130e3d541c7e92, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  attackRange: 2
-  damageAmount: 10
-  attackCooldown: 2
-  player: {fileID: 1027688740}
 --- !u!1 &1924892038
 GameObject:
   m_ObjectHideFlags: 0
