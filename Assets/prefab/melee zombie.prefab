@@ -13,11 +13,12 @@ GameObject:
   - component: {fileID: 8932292846741218122}
   - component: {fileID: 2414818698424411669}
   - component: {fileID: 623679562233457836}
-  - component: {fileID: 5829105016785395303}
   - component: {fileID: 5578734609387720028}
+  - component: {fileID: 4002467467495005549}
+  - component: {fileID: 8103489155072296455}
   m_Layer: 0
   m_Name: melee zombie
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -32,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -88.571, y: 10.6, z: -400.94678}
-  m_LocalScale: {x: 6.55844, y: 6.55844, z: 6.55844}
+  m_LocalScale: {x: 3.86194, y: 3.86194, z: 3.86194}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8408204962026374009}
@@ -144,20 +145,6 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &5829105016785395303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 17697398868721479}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed72053456b9dbc479a41938fe645b23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::enemyAI
-  moveSpeed: 35
-  detectionRange: 400
 --- !u!54 &5578734609387720028
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -166,7 +153,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 17697398868721479}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -181,10 +168,56 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &4002467467495005549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 17697398868721479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2658469965
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &8103489155072296455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 17697398868721479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 402b8a0ed129a074d8ad120c609f4c0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIEnemy
+  ShowTopMostFoldoutHeaderGroup: 1
+  detectionRange: 400
+  attackRange: 10
+  patrolRadius: 100
+  walkSpeed: 20
+  runSpeed: 30
+  stoppingDistanceBuffer: 0.3
+  agent: {fileID: 623679562233457836}
+  animator: {fileID: 7090019551773156194}
 --- !u!1 &37618415997216619
 GameObject:
   m_ObjectHideFlags: 0
@@ -1719,7 +1752,7 @@ Transform:
   m_GameObject: {fileID: 1803253288757921774}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.1357238, z: 0.014476966}
+  m_LocalPosition: {x: 0, y: -1.03, z: 0.014476966}
   m_LocalScale: {x: 1.5694897, y: 1.145613, z: 1.5694897}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3842,7 +3875,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4815120711656081146}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5082b6b4235772a40b7eadb481651a53, type: 3}
   m_Name: 
