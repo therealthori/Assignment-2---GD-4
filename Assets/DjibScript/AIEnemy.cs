@@ -4,7 +4,7 @@ using Unity.Netcode;
 
 public class AIEnemy : NetworkBehaviour
 {
-  public enum EnemyState { Patrol, Chase, Attack, Dead }
+    public enum EnemyState { Patrol, Chase, Attack, Dead }
 
     [Header("Ranges")]
     public float detectionRange = 15f;
@@ -13,11 +13,25 @@ public class AIEnemy : NetworkBehaviour
     [Header("Movement")]
     public float patrolRadius = 10f;
 
-    public float walkSpeed = 2f;   // 🟢 NEW
-    public float runSpeed = 5f;    // 🟢 NEW
+    public float walkSpeed = 2f;
+    public float runSpeed = 5f;
 
     [Header("Nav Fix (IMPORTANT)")]
     public float stoppingDistanceBuffer = 0.3f;
+
+    [Header("Knockback")]
+    public float knockbackDuration = 0.5f;
+
+    private bool isKnockedBack = false;
+    private float knockbackTimer = 0f;
+    private Rigidbody rb;
+
+    [Header("Ground Check")]
+public float groundCheckDistance = 0.3f;
+public LayerMask groundLayer;
+
+private bool isGrounded;   
+
 
     [Header("References")]
     public NavMeshAgent agent;
@@ -55,10 +69,28 @@ public class AIEnemy : NetworkBehaviour
         agent.autoBraking = true;
         agent.acceleration = 30f;
         agent.angularSpeed = 720f;
+
+        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
+        CheckGrounded();
+UpdateFallingAnimation();
+
+        if (isKnockedBack)
+        {
+            knockbackTimer -= Time.deltaTime;
+
+            if (knockbackTimer <= 0f)
+            {
+                isKnockedBack = false;
+                agent.enabled = true; // give control back to AI
+            }
+
+            return; // skip AI logic while being pushed
+        }
+
         bool isMultiplayerRunning =
             NetworkManager.Singleton != null &&
             NetworkManager.Singleton.IsListening;
@@ -273,4 +305,39 @@ public class AIEnemy : NetworkBehaviour
             Gizmos.DrawLine(transform.position, targetPlayer.position);
         }
     }
+    public void ApplyKnockback(Vector3 force)
+{
+    if (rb == null) return;
+
+    isKnockedBack = true;
+    knockbackTimer = knockbackDuration;
+
+    // Disable NavMesh so physics can take over
+    agent.enabled = false;
+
+    rb.linearVelocity = Vector3.zero; // reset existing movement
+    rb.AddForce(force, ForceMode.Impulse);
+    animator.SetBool("isFalling", true);
+}
+void CheckGrounded()
+{
+    isGrounded = Physics.Raycast(
+        transform.position + Vector3.up * 0.2f,
+        Vector3.down,
+        groundCheckDistance,
+        groundLayer
+    );
+}
+void UpdateFallingAnimation()
+{
+    animator.SetBool("isFalling", !isGrounded);
+
+    // Optional: force override movement states while falling
+    if (!isGrounded)
+    {
+        animator.SetBool("isWalking", false);
+        animator.SetBool("isRunning", false);
+        animator.SetBool("isAttacking", false);
+    }
+}
 }
