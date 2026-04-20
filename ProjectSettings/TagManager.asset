@@ -7,6 +7,9 @@ TagManager:
   - Ground
   - Player1
   - Enemy
+  - WhiteImage
+  - WhiteNoise
+  - Bang
   layers:
   - Default
   - TransparentFX
