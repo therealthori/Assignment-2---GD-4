@@ -29,8 +29,8 @@ public class EnemySpawning : MonoBehaviour
 
     private void Update()
     {
-        // Optional: spawn with Space key (dev)
-        if (Input.GetKeyDown(KeyCode.Space))
+        // Optional: spawn with Y key (dev)
+        if (Input.GetKeyDown(KeyCode.Y))
         {
             SpawnEnemy();
         }
