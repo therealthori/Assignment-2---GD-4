@@ -645,7 +645,7 @@ Transform:
   m_GameObject: {fileID: 769280573}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.24000001, y: -0.94, z: 1.1300001}
+  m_LocalPosition: {x: 0.96, y: -1.26, z: 1.77}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -875,11 +875,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 876607079}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &910147850 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7871347713793619007, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-  m_PrefabInstance: {fileID: 6724607983314625540}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &929873889
 GameObject:
   m_ObjectHideFlags: 0
@@ -955,6 +950,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 929873889}
   m_CullTransparentMesh: 1
+--- !u!1 &967335568 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 17697398868721479, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+  m_PrefabInstance: {fileID: 1732287237}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &967335577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967335568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38edad09d22ae74469130e3d541c7e92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  attackRange: 2
+  damageAmount: 10
+  attackCooldown: 1.5
+  player: {fileID: 1397875457}
+--- !u!114 &967335578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967335568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c62bbff4fbcb6af48815cc900c480dc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatController
+  health: 50
+  healthBar: {fileID: 1656949159}
 --- !u!1 &1098862786
 GameObject:
   m_ObjectHideFlags: 0
@@ -1308,13 +1338,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectLogic
   cam: {fileID: 213260590}
   attackPoint: {fileID: 769280574}
-  objectToThrow: {fileID: 0}
+  objectToThrow: {fileID: 1827801871663013180, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
   totalThrows: 5
   throwCooldown: 2
   ammoText: {fileID: 0}
-  throwKey: 107
+  throwKey: 112
   throwForce: 30
   throwUpwardForce: 2
+--- !u!4 &1397875457 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
+  m_PrefabInstance: {fileID: 148395598}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1409249004
 GameObject:
   m_ObjectHideFlags: 0
@@ -1532,6 +1567,17 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1656949159 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4165965295511170635, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+  m_PrefabInstance: {fileID: 1732287237}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72f3b5ca5fd5d249b51bf1d612dfffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
 --- !u!1001 &1732287237
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1596,9 +1642,17 @@ PrefabInstance:
       propertyPath: cam
       value: 
       objectReference: {fileID: 213260590}
+    - target: {fileID: 3145411870468582175, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4002467467495005549, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 2496969684
+      objectReference: {fileID: 0}
+    - target: {fileID: 4165965295511170635, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6357963918785348964, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
       propertyPath: m_Camera
@@ -1611,7 +1665,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 17697398868721479, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 967335577}
+    - targetCorrespondingSourceObject: {fileID: 17697398868721479, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 967335578}
   m_SourcePrefab: {fileID: 100100000, guid: b4c7372e26bef23438e827bcf8ac31bf, type: 3}
 --- !u!1 &1924892038
 GameObject:
@@ -2003,7 +2063,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1827801871663013180, guid: c1dc546a7aafcc44092d9aa2c733702f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2018,18 +2078,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1489239957849810312, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1489239957849810312, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1489239957849810312, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 1489239957849810312, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.62
@@ -2074,37 +2122,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: MolotovCocktaill
       objectReference: {fileID: 0}
+    - target: {fileID: 1827801871663013180, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1827801871663013180, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6724607983314625542}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
---- !u!1 &6724607983314625541 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1827801871663013180, guid: a46e965046337eb4e82d6b761c2c233d, type: 3}
-  m_PrefabInstance: {fileID: 6724607983314625540}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6724607983314625542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6724607983314625541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1e27db29bdf37f4da7326f2f3ec8bb7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Molotov
-  fireDamage: 5
-  fireTickRate: 0.5
-  fireDuration: 10
-  fireRadius: 16
-  fireEffectPrefab: {fileID: 8829451551789304542, guid: 8206b722d11501a449d6a278cca2adfa, type: 3}
-  bottlePrefab: {fileID: 910147850}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
