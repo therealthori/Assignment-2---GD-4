@@ -27,10 +27,10 @@ public class AIEnemy : NetworkBehaviour
     private Rigidbody rb;
 
     [Header("Ground Check")]
-public float groundCheckDistance = 0.3f;
-public LayerMask groundLayer;
+    public float groundCheckDistance = 0.3f;
+    public LayerMask groundLayer;
 
-private bool isGrounded;   
+    private bool isGrounded;
 
 
     [Header("References")]
@@ -64,7 +64,7 @@ private bool isGrounded;
             currentState = EnemyState.Patrol;
         }
 
-        // 🔥 NAV FIXES (important for overshoot)
+        // NAV FIXES (important for overshoot)
         agent.stoppingDistance = attackRange - stoppingDistanceBuffer;
         agent.autoBraking = true;
         agent.acceleration = 30f;
@@ -76,20 +76,26 @@ private bool isGrounded;
     void Update()
     {
         CheckGrounded();
-UpdateFallingAnimation();
+        UpdateFallingAnimation();
 
-        if (isKnockedBack)
-        {
-            knockbackTimer -= Time.deltaTime;
+       if (isKnockedBack)
+{
+    knockbackTimer -= Time.deltaTime;
 
-            if (knockbackTimer <= 0f)
-            {
-                isKnockedBack = false;
-                agent.enabled = true; // give control back to AI
-            }
+    if (knockbackTimer <= 0f)
+    {
+        isKnockedBack = false;
 
-            return; // skip AI logic while being pushed
-        }
+        // Restore NavMesh control
+        agent.isStopped = false;
+        agent.updatePosition = true;
+        agent.updateRotation = true;
+
+        agent.Warp(transform.position); // prevents snapping issues
+    }
+
+    return; // skip AI logic while being pushed
+}
 
         bool isMultiplayerRunning =
             NetworkManager.Singleton != null &&
@@ -154,28 +160,43 @@ UpdateFallingAnimation();
 
     void Chase()
     {
-        if (targetPlayer == null)
+     if (targetPlayer == null)
+    {
+        ChangeState(EnemyState.Patrol);
+        return;
+    }
+
+    agent.isStopped = false;
+    agent.speed = runSpeed;
+
+    float desiredStoppingDist = attackRange - stoppingDistanceBuffer;
+    agent.stoppingDistance = desiredStoppingDist;
+
+    Vector3 toTarget = targetPlayer.position - transform.position;
+    float distance = toTarget.magnitude;
+
+    agent.SetDestination(targetPlayer.position);
+
+    // Check if we’re in attack range **and somewhat facing the player**
+    if (distance < attackRange + 0.5f)
+    {
+        Vector3 forward = transform.forward;
+        forward.y = 0;
+        toTarget.y = 0;
+        float angle = Vector3.Angle(forward, toTarget);
+
+        // If enemy is roughly facing the player, allow attack
+        if (angle < 90f) // or 100‑110 if you want super‑forgiving
         {
-            ChangeState(EnemyState.Patrol);
-            return;
-        }
-
-        agent.isStopped = false;
-        agent.speed = runSpeed;
-
-        // 🔥 CRITICAL FIX FOR OVERSHOOT
-        agent.stoppingDistance = attackRange;
-
-        float distance = Vector3.Distance(transform.position, targetPlayer.position);
-
-        agent.SetDestination(targetPlayer.position);
-
-        if (distance <= attackRange + 0.2f)
             ChangeState(EnemyState.Attack);
-        else if (distance > detectionRange)
-            ChangeState(EnemyState.Patrol);
+        }
+    }
+    else if (distance > detectionRange)
+    {
+        ChangeState(EnemyState.Patrol);
+    }
 
-        UpdateAnimations(EnemyState.Chase);
+    UpdateAnimations(EnemyState.Chase);
     }
 
     // ========================
@@ -183,40 +204,40 @@ UpdateFallingAnimation();
     // ========================
 
     void Attack()
+    {  if (targetPlayer == null)
     {
-        if (targetPlayer == null)
-        {
-            ChangeState(EnemyState.Patrol);
-            return;
-        }
+        ChangeState(EnemyState.Patrol);
+        return;
+    }
 
-        float distance = Vector3.Distance(transform.position, targetPlayer.position);
+    float distance = Vector3.Distance(transform.position, targetPlayer.position);
 
-        agent.isStopped = true;
-        agent.ResetPath();
-        agent.velocity = Vector3.zero;
+    // Only fully stop if we’re clearly outside attack range
+    if (distance > attackRange + 0.5f)
+    {
+        ChangeState(EnemyState.Chase);
+        return;
+    }
 
-        // FAST TURNING
-        Vector3 dir = (targetPlayer.position - transform.position);
-        dir.y = 0;
+    // Don’t stop the agent immediately; just let it slow naturally
+    agent.isStopped = true;
+    agent.velocity = Vector3.zero;
 
-        if (dir != Vector3.zero)
-        {
-            Quaternion rot = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                rot,
-                720f * Time.deltaTime
-            );
-        }
+    // FAST TURNING
+    Vector3 dir = targetPlayer.position - transform.position;
+    dir.y = 0;
 
-        if (distance > attackRange)
-        {
-            ChangeState(EnemyState.Chase);
-            return;
-        }
+    if (dir != Vector3.zero)
+    {
+        Quaternion rot = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            rot,
+            720f * Time.deltaTime
+        );
+    }
 
-        UpdateAnimations(EnemyState.Attack);
+    UpdateAnimations(EnemyState.Attack);
     }
 
     // ========================
@@ -306,38 +327,44 @@ UpdateFallingAnimation();
         }
     }
     public void ApplyKnockback(Vector3 force)
-{
-    if (rb == null) return;
-
-    isKnockedBack = true;
-    knockbackTimer = knockbackDuration;
-
-    // Disable NavMesh so physics can take over
-    agent.enabled = false;
-
-    rb.linearVelocity = Vector3.zero; // reset existing movement
-    rb.AddForce(force, ForceMode.Impulse);
-    animator.SetBool("isFalling", true);
-}
-void CheckGrounded()
-{
-    isGrounded = Physics.Raycast(
-        transform.position + Vector3.up * 0.2f,
-        Vector3.down,
-        groundCheckDistance,
-        groundLayer
-    );
-}
-void UpdateFallingAnimation()
-{
-    animator.SetBool("isFalling", !isGrounded);
-
-    // Optional: force override movement states while falling
-    if (!isGrounded)
     {
-        animator.SetBool("isWalking", false);
-        animator.SetBool("isRunning", false);
-        animator.SetBool("isAttacking", false);
+        if (rb == null) return;
+
+        isKnockedBack = true;
+        knockbackTimer = knockbackDuration;
+
+        // Stop NavMesh movement WITHOUT disabling it
+        agent.isStopped = true;
+        agent.updatePosition = false;
+        agent.updateRotation = false;
+
+        // Apply physics force
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce(force, ForceMode.Impulse);
+
+        animator.SetBool("isFalling", true);
     }
-}
+
+    void CheckGrounded()
+    {
+        isGrounded = Physics.Raycast(
+            transform.position + Vector3.up * 0.2f,
+            Vector3.down,
+            groundCheckDistance,
+            groundLayer
+        );
+    }
+
+    void UpdateFallingAnimation()
+    {
+        animator.SetBool("isFalling", !isGrounded);
+
+        // Override other animations while airborne
+        if (!isGrounded)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isRunning", false);
+            animator.SetBool("isAttacking", false);
+        }
+    }
 }

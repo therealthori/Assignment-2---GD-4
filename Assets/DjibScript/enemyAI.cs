@@ -1,58 +1,68 @@
 using UnityEngine;
-using System.Collections;   
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.AI;   
+using UnityEngine.AI;
+using UnityEngine.Animations;
 
 public class enemyAI : MonoBehaviour
 {
-    public float moveSpeed = 5f;              // How fast the enemy moves
-    public float detectionRange = 20f;        // Only chase if a player is within this distance
+    public int health = 100;
 
-    private Rigidbody rb;
-    private Transform closestPlayer;
-    private string playerTag = "Player";
+    public Transform Player;
+    public float detectionRange = 50f;
+    public float attackDistance = 3f;
+    public float attackinterval = 2f;
 
+    NavMeshAgent Agent;
+   public Animator anim;
+    bool isDead = false;
+    bool isAttacking = false;
 
-    void Start()
+    private void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        if (rb == null)
+        Agent = GetComponent<NavMeshAgent>();
+        anim = GetComponent<Animator>();
+
+        if(Player== null)
         {
-            Debug.LogError("EnemyAI: missing Rigidbody component!");
+            Player= GameObject.FindGameObjectWithTag("Player").transform;
         }
     }
 
-
-    void Update()
+    private void Update()
     {
-        FindClosestPlayer();
-        if (closestPlayer != null)
+        if (isDead) return;
+        float Distance = Vector3.Distance(transform.position, Player.position);
+       
+        if(Distance<= detectionRange)
         {
-            Vector3 direction = (closestPlayer.position - transform.position).normalized;
-            rb.linearVelocity = direction * moveSpeed;
+            Agent.SetDestination(Player.position);
+            anim.SetBool("isWalking", true);
 
-            // Optional: rotate to face the player
-            transform.LookAt(closestPlayer);
-        }
-    }
-
-
-    void FindClosestPlayer()
-    {
-        // Find all objects with the "Player" tag
-        GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
-
-        closestPlayer = null;
-        float closestDistance = detectionRange;
-
-        foreach (GameObject player in players)
-        {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
-            if (distance < closestDistance)
+            if(Distance<=attackDistance && isAttacking)
             {
-                closestDistance = distance;
-                closestPlayer = player.transform;
+                StartCoroutine( PlayAttackAnimation());
             }
         }
+        else
+        {
+            Agent.ResetPath();
+            anim.SetBool("isWalking", false);
+            //lost player
+        }
     }
+
+
+    IEnumerator PlayAttackAnimation()
+    {
+        isAttacking = true;
+        Agent.isStopped= true;
+        anim.SetTrigger("Attack");
+
+        yield return new WaitForSeconds(attackinterval);
+
+        Agent.isStopped = false;
+        isAttacking = false;
+    }
+
 }

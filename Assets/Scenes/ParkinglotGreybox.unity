@@ -15045,7 +15045,6 @@ Transform:
   - {fileID: 1412063362}
   - {fileID: 1935338609}
   - {fileID: 2008858581}
-  - {fileID: 1915169180}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &216277397
@@ -29467,7 +29466,7 @@ Transform:
   m_GameObject: {fileID: 728857222}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -49.1418, y: 0, z: -122.03649}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -44713,7 +44712,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 210186845}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
       propertyPath: m_LocalScale.x
@@ -44729,15 +44728,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 183.73831
+      value: 77.99875
       objectReference: {fileID: 0}
     - target: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 28.038
+      value: 217
       objectReference: {fileID: 0}
     - target: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -60.107193
+      value: -20.790726
       objectReference: {fileID: 0}
     - target: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -57136,7 +57135,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 51.952457, y: 44.027508, z: 44.027508}
+  m_LocalScale: {x: 51.952457, y: 44.027508, z: 87.61474}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -66840,11 +66839,6 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
---- !u!4 &1915169180 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1036732874012214435, guid: c64778f2e5ac96440b93e670162472d0, type: 3}
-  m_PrefabInstance: {fileID: 1258112980}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1915335597
 GameObject:
   m_ObjectHideFlags: 0
@@ -75990,6 +75984,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 534078484}
+  - {fileID: 1258112980}
   - {fileID: 1688685920}
   - {fileID: 1604618927}
   - {fileID: 9871608}
