@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class ObjectLogic : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class ObjectLogic : MonoBehaviour
     [Header("Settings")]
     public int totalThrows;
     public float throwCooldown;
+    public TextMeshProUGUI ammoText;       // Optional: drag UI text here
 
     [Header("Throwing")]
     public KeyCode throwKey = KeyCode.Mouse0;
@@ -23,11 +25,12 @@ public class ObjectLogic : MonoBehaviour
     private void Start()
     {
         readyToThrow = true;
+        UpdateAmmoUI();
     }
 
     private void Update()
     {
-        if(Input.GetKeyDown(throwKey) && readyToThrow && totalThrows > 0)
+        if (Input.GetKeyDown(throwKey) && readyToThrow && totalThrows > 0)
         {
             Throw();
         }
@@ -37,36 +40,38 @@ public class ObjectLogic : MonoBehaviour
     {
         readyToThrow = false;
 
-        // instantiate object to throw
         GameObject projectile = Instantiate(objectToThrow, attackPoint.position, cam.rotation);
-
-        // get rigidbody component
         Rigidbody projectileRb = projectile.GetComponent<Rigidbody>();
 
-        // calculate direction
         Vector3 forceDirection = cam.transform.forward;
 
         RaycastHit hit;
-
-        if(Physics.Raycast(cam.position, cam.forward, out hit, 500f))
+        if (Physics.Raycast(cam.position, cam.forward, out hit, 500f))
         {
             forceDirection = (hit.point - attackPoint.position).normalized;
         }
 
-        // add force
         Vector3 forceToAdd = forceDirection * throwForce + transform.up * throwUpwardForce;
-
         projectileRb.AddForce(forceToAdd, ForceMode.Impulse);
 
-        totalThrows--;
+        // ✅ Add spin so it looks like a real thrown bottle
+        projectileRb.AddTorque(Random.insideUnitSphere * 10f, ForceMode.Impulse);
 
-        // implement throwCooldown
+        totalThrows--;
+        UpdateAmmoUI();
+
         Invoke(nameof(ResetThrow), throwCooldown);
     }
 
     private void ResetThrow()
     {
         readyToThrow = true;
+    }
+
+    void UpdateAmmoUI()
+    {
+        if (ammoText != null)
+            ammoText.text = "Molotovs: " + totalThrows;
     }
 
 }
