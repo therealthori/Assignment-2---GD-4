@@ -6,7 +6,7 @@ using UnityEngine.Animations;
 
 public class enemyAI : MonoBehaviour
 {
-    public int health = 100;
+    //public int health = 100;
 
     public Transform Player;
     public float detectionRange = 50f;
