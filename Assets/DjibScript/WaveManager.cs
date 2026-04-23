@@ -1,118 +1,111 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 
-public class WaveManager : MonoBehaviour
+public class WaveManager : NetworkBehaviour
 {
-   [Header("Spawn Settings")]
-    public GameObject[] spawners;              // Drag spawner GameObjects here
-    public GameObject[] enemyPrefabs;          // Drag enemy Prefabs here
-    public float spawnInterval = 2f;           // Time between spawns in a wave
+
+  [Header("Spawning")]
+    public Transform[] spawnPoints;
+    public GameObject[] enemyPrefabs;
 
     [Header("Wave Settings")]
-    public TMP_Text waveText;                      // UI Text (e.g. "Wave 1 starting!")
-    public float timeBetweenWaves = 5f;        // Wait after wave ends before next wave
-    public int enemiesPerWave = 5;             // How many enemies per wave
-
+    public float spawnInterval = 60f;
+    public int enemiesPerWave = 10;
+    public int increasePerWave = 5;
 
     private int currentWave = 0;
-    private int spawnedThisWave = 0;
-    private float nextSpawnTime;
-    private bool waveActive = false;
 
-    private void Start()
+    private bool isSinglePlayer = false;
+
+    void Start()
     {
-        if (spawners.Length == 0)
+        Debug.Log("WaveManager Start()");
+
+        // 🧪 Detect if Netcode is running
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
         {
-            Debug.LogError("EnemySpawning: no spawners assigned!");
-        }
-        if (enemyPrefabs.Length == 0)
-        {
-            Debug.LogError("EnemySpawning: no enemy prefabs assigned!");
+            Debug.Log("Running in SINGLEPLAYER mode");
+            isSinglePlayer = true;
+            StartCoroutine(SpawnLoop());
+            return;
         }
 
-        // Start first wave after a short delay
-        Invoke(nameof(StartWave), timeBetweenWaves);
+        // 🌐 Multiplayer
+        if (!IsServer)
+        {
+            Debug.Log("Client detected → not spawning");
+            return;
+        }
+
+        Debug.Log("Server detected → spawning enabled");
+        StartCoroutine(SpawnLoop());
     }
 
-    private void Update()
+    IEnumerator SpawnLoop()
     {
-        // Optional: trigger next wave with Space (dev)
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            if (!waveActive)
-                StartWave();
-        }
+        Debug.Log("SpawnLoop started");
 
-        // Wave spawning loop
-        if (waveActive && Time.time >= nextSpawnTime)
+        while (true)
+        {
+            yield return new WaitForSeconds(spawnInterval);
+
+            currentWave++;
+
+            int enemiesToSpawn = enemiesPerWave + (currentWave * increasePerWave);
+
+            Debug.Log($"Wave {currentWave} spawning {enemiesToSpawn} enemies");
+
+            SpawnWave(enemiesToSpawn);
+        }
+    }
+
+    void SpawnWave(int amount)
+    {
+        for (int i = 0; i < amount; i++)
         {
             SpawnEnemy();
-            spawnedThisWave++;
-            nextSpawnTime = Time.time + spawnInterval;
-
-            if (spawnedThisWave >= enemiesPerWave)
-            {
-                EndWave();
-            }
         }
     }
 
-    private void StartWave()
+    void SpawnEnemy()
     {
-        currentWave++;
-        waveActive = true;
-        spawnedThisWave = 0;
-
-        // Optional: update UI text
-        if (waveText != null)
-            waveText.text = "Wave " + currentWave + " starting!";
-
-        Debug.Log("Wave " + currentWave + " starting!");
-
-        // Randomly pick how many enemies this wave spawns (or just keep fixed)
-        enemiesPerWave = 5 + (currentWave - 1) * 2;  // Increase per wave
-
-        // Add a new enemy type prefab every wave (if you have them)
-        // This is just an example: you can fine‑tune how you grow enemyPrefabs
-        // (e.g. by growing a list instead of re‑assigning array)
-    }
-
-    private void EndWave()
-    {
-        waveActive = false;
-
-        if (waveText != null)
-            waveText.text = "Wave " + currentWave + " completed!";
-
-        Debug.Log("Wave " + currentWave + " ended.");
-
-        // Schedule next wave after delay
-        Invoke(nameof(StartWave), timeBetweenWaves);
-    }
-
-    private void SpawnEnemy()
-    {
-        if (spawners.Length == 0 || enemyPrefabs.Length == 0)
+        if (spawnPoints.Length == 0 || enemyPrefabs.Length == 0)
+        {
+            Debug.LogError("❌ Missing spawn points or prefabs");
             return;
+        }
 
-        // 1. Pick a random spawner
-        int spawnerIndex = Random.Range(0, spawners.Length);
-        Transform spawner = spawners[spawnerIndex].transform;
+        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
 
-        // 2. Pick a random enemy prefab (now it can grow with waves)
-        int enemyIndex = Random.Range(0, GetCurrentEnemyCount());
-        GameObject enemyPrefab = enemyPrefabs[enemyIndex];
+        GameObject enemy = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
 
-        // 3. Instantiate
-        Instantiate(enemyPrefab, spawner.position, spawner.rotation);
-    }
+        // 🌐 Multiplayer spawn
+        if (!isSinglePlayer)
+        {
+            NetworkObject netObj = enemy.GetComponent<NetworkObject>();
 
-    // Let the number of available enemy types grow with the wave
-    private int GetCurrentEnemyCount()
-    {
-        // Clamp so we don’t overflow the array
-        return Mathf.Min(currentWave, enemyPrefabs.Length);
+            if (netObj == null)
+            {
+                Debug.LogError("❌ Missing NetworkObject on enemy prefab");
+                return;
+            }
+
+            netObj.Spawn();
+        }
+
+        // Fix NavMeshAgent positioning
+        var agent = enemy.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.Warp(spawnPoint.position);
+        }
+
+        Debug.Log("✅ Enemy spawned at " + spawnPoint.position);
     }
 }
+
