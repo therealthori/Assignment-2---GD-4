@@ -52,13 +52,10 @@ public class Molotov : MonoBehaviour
 
             foreach (Collider hit in hits)
             {
-                CombatController enemy = hit.GetComponent<CombatController>();
+                AIEnemy enemy = hit.GetComponent<AIEnemy>();
                 if (enemy != null)
                 {
-                    enemy.TakeDamage(fireDamage);       
-
-                    // Trigger gethit animation
-                    AIEnemy ai = hit.GetComponent<AIEnemy>();
+                    enemy.TakeDamage(fireDamage);
                 }
             }
 
