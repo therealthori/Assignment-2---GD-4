@@ -1,4 +1,4 @@
- using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 using Unity.Netcode;
 
@@ -60,7 +60,7 @@ public class AIEnemy : NetworkBehaviour
     private string playerTag = "Player";
 
 
-    private NetworkVariable<EnemyState> netState = new NetworkVariable<EnemyState>();
+    public NetworkVariable<EnemyState> netState = new NetworkVariable<EnemyState>();
 
 
     public override void OnNetworkSpawn()
@@ -76,6 +76,8 @@ public class AIEnemy : NetworkBehaviour
 
     void Start()
     {
+        agent.updatePosition = true; agent.updateRotation = true; // ensure NavMeshAgent is controlling movement
+
         if (!NetworkManager.Singleton || !NetworkManager.Singleton.IsListening)
         {
             currentState = EnemyState.Patrol;
@@ -95,32 +97,33 @@ public class AIEnemy : NetworkBehaviour
 
     void Update()
     {
-        CheckGrounded();
-        UpdateFallingAnimation();
+       CheckGrounded();
+    UpdateFallingAnimation();
 
+    // ← NEW DEBUG 1: Every frame status
+    Debug.Log($"[DEBUG] State:{currentState} | Grounded:{isGrounded} | Knockback:{isKnockedBack}({knockbackTimer:F1}s) | Target:{(targetPlayer ? targetPlayer.name : "null")}");
 
-       if (isKnockedBack)
-{
-    knockbackTimer -= Time.deltaTime;
-
-
-    if (knockbackTimer <= 0f)
+    if (isKnockedBack)
     {
-        isKnockedBack = false;
+        knockbackTimer -= Time.deltaTime;
 
+        if (knockbackTimer <= 0f)
+        {
+            isKnockedBack = false;
 
-        // Restore NavMesh control
-        agent.isStopped = false;
-        agent.updatePosition = true;
-        agent.updateRotation = true;
+            // Restore NavMesh control
+            agent.isStopped = false;
+            agent.updatePosition = true;
+            agent.updateRotation = true;
 
-
-        agent.Warp(transform.position); // prevents snapping issues
-    }
-
-
-    return; // skip AI logic while being pushed
-}
+            rb.linearVelocity = Vector3.zero;
+            agent.Warp(transform.position);
+            agent.nextPosition = transform.position;
+            
+            Debug.Log("[DEBUG] KNOCKBACK ENDED → Back to Patrol");  // ← NEW
+        }
+        return;
+        }
 
 
         bool isMultiplayerRunning =
@@ -201,50 +204,50 @@ public class AIEnemy : NetworkBehaviour
 
     void Chase()
     {
-     if (targetPlayer == null)
-    {
-        ChangeState(EnemyState.Patrol);
-        return;
-    }
-
-
-    agent.isStopped = false;
-    agent.speed = runSpeed;
-
-
-    float desiredStoppingDist = attackRange - stoppingDistanceBuffer;
-    agent.stoppingDistance = desiredStoppingDist;
-
-
-    Vector3 toTarget = targetPlayer.position - transform.position;
-    float distance = toTarget.magnitude;
-
-
-    agent.SetDestination(targetPlayer.position);
-
-
-    // Check if we’re in attack range **and somewhat facing the player**
-    if (distance < attackRange + 0.5f)
-    {
-        Vector3 forward = transform.forward;
-        forward.y = 0;
-        toTarget.y = 0;
-        float angle = Vector3.Angle(forward, toTarget);
-
-
-        // If enemy is roughly facing the player, allow attack
-        if (angle < 90f) // or 100‑110 if you want super‑forgiving
+        if (targetPlayer == null)
         {
-            ChangeState(EnemyState.Attack);
+            ChangeState(EnemyState.Patrol);
+            return;
         }
-    }
-    else if (distance > detectionRange)
-    {
-        ChangeState(EnemyState.Patrol);
-    }
 
 
-    UpdateAnimations(EnemyState.Chase);
+        agent.isStopped = false;
+        agent.speed = runSpeed;
+
+
+        float desiredStoppingDist = attackRange - stoppingDistanceBuffer;
+        agent.stoppingDistance = desiredStoppingDist;
+
+
+        Vector3 toTarget = targetPlayer.position - transform.position;
+        float distance = toTarget.magnitude;
+
+
+        agent.SetDestination(targetPlayer.position);
+
+
+        // Check if we’re in attack range **and somewhat facing the player**
+        if (distance < attackRange + 0.5f)
+        {
+            Vector3 forward = transform.forward;
+            forward.y = 0;
+            toTarget.y = 0;
+            float angle = Vector3.Angle(forward, toTarget);
+
+
+            // If enemy is roughly facing the player, allow attack
+            if (angle < 90f) // or 100‑110 if you want super‑forgiving
+            {
+                ChangeState(EnemyState.Attack);
+            }
+        }
+        else if (distance > detectionRange)
+        {
+            ChangeState(EnemyState.Patrol);
+        }
+
+
+        UpdateAnimations(EnemyState.Chase);
     }
 
 
@@ -254,46 +257,47 @@ public class AIEnemy : NetworkBehaviour
 
 
     void Attack()
-    {  if (targetPlayer == null)
     {
-        ChangeState(EnemyState.Patrol);
-        return;
-    }
+        if (targetPlayer == null)
+        {
+            ChangeState(EnemyState.Patrol);
+            return;
+        }
 
 
-    float distance = Vector3.Distance(transform.position, targetPlayer.position);
+        float distance = Vector3.Distance(transform.position, targetPlayer.position);
 
 
-    // Only fully stop if we’re clearly outside attack range
-    if (distance > attackRange + 0.5f)
-    {
-        ChangeState(EnemyState.Chase);
-        return;
-    }
+        // Only fully stop if we’re clearly outside attack range
+        if (distance > attackRange + 0.5f)
+        {
+            ChangeState(EnemyState.Chase);
+            return;
+        }
 
 
-    // Don’t stop the agent immediately; just let it slow naturally
-    agent.isStopped = true;
-    agent.velocity = Vector3.zero;
+        // Don’t stop the agent immediately; just let it slow naturally
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
 
-    // FAST TURNING
-    Vector3 dir = targetPlayer.position - transform.position;
-    dir.y = 0;
+        // FAST TURNING
+        Vector3 dir = targetPlayer.position - transform.position;
+        dir.y = 0;
 
 
-    if (dir != Vector3.zero)
-    {
-        Quaternion rot = Quaternion.LookRotation(dir);
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation,
-            rot,
-            720f * Time.deltaTime
-        );
-    }
+        if (dir != Vector3.zero)
+        {
+            Quaternion rot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                rot,
+                720f * Time.deltaTime
+            );
+        }
 
 
-    UpdateAnimations(EnemyState.Attack);
+        UpdateAnimations(EnemyState.Attack);
     }
 
 
@@ -356,96 +360,102 @@ public class AIEnemy : NetworkBehaviour
     // ========================
 
 
-    void ChangeState(EnemyState newState)
+void ChangeState(EnemyState newState)
+{
+    if (currentState != newState)  // Only log changes
     {
-        currentState = newState;
+        Debug.Log($"[DEBUG] STATE CHANGE: {currentState} → {newState}");  // ← NEW
+    }
+    
+    currentState = newState;
 
+    if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+        netState.Value = newState;
+}
 
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
-            netState.Value = newState;
+void UpdateAnimations(EnemyState state)
+{
+    animator.SetBool("isWalking", state == EnemyState.Patrol);
+    animator.SetBool("isRunning", state == EnemyState.Chase);
+    animator.SetBool("isAttacking", state == EnemyState.Attack);
+    
+    // ← NEW DEBUG 2: Animator params
+    Debug.Log($"[ANIM] Set: Walk={animator.GetBool("isWalking")} Run={animator.GetBool("isRunning")} Attack={animator.GetBool("isAttacking")}");
+}
+
+void UpdateFallingAnimation()
+{
+    bool wasFalling = animator.GetBool("isFalling");
+    animator.SetBool("isFalling", !isGrounded);
+
+    // ← NEW DEBUG 3: Fall logic
+    if (animator.GetBool("isFalling") != wasFalling)
+    {
+        Debug.Log($"[FALL] Changed: {wasFalling} → {animator.GetBool("isFalling")} (Grounded:{isGrounded})");
     }
 
-
-    // ========================
-    // ANIMATION
-    // ========================
-
-
-    void UpdateAnimations(EnemyState state)
+    if (!isGrounded && knockbackTimer > 0.1f)
     {
-        animator.SetBool("isWalking", state == EnemyState.Patrol);
-        animator.SetBool("isRunning", state == EnemyState.Chase);
-        animator.SetBool("isAttacking", state == EnemyState.Attack);
+        animator.SetBool("isWalking", false);
+        animator.SetBool("isRunning", false);
+        animator.SetBool("isAttacking", false);
+        Debug.Log("[FALL] OVERRIDE: Cleared movement anims");  // ← NEW
+    }
+    else if (wasFalling && isGrounded)
+    {
+        animator.SetBool("isFalling", false);
+        Debug.Log("[FALL] RECOVERY: Cleared isFalling");  // ← NEW
+    }
+}
+void CheckGrounded()
+{
+    isGrounded = Physics.Raycast(
+        transform.position + Vector3.up * 0.2f,
+        Vector3.down,
+        groundCheckDistance,
+        groundLayer
+    );
+}
+
+public void ApplyKnockback(Vector3 force)
+{
+    if (rb == null) return;
+
+    Debug.Log("[DEBUG] APPLY KNOCKBACK START");  // ← NEW
+
+    isKnockedBack = true;
+    knockbackTimer = knockbackDuration;
+
+    agent.isStopped = true;
+    agent.updatePosition = false;
+    agent.updateRotation = false;
+
+    rb.linearVelocity = Vector3.zero;
+    rb.AddForce(force, ForceMode.Impulse);
+
+    animator.SetBool("isFalling", true);
+}
+
+
+void OnDrawGizmos()
+{
+    // Detection range (yellow)
+    Gizmos.color = Color.yellow;
+    Gizmos.DrawWireSphere(transform.position, detectionRange);
+
+    // Attack range (red)  
+    Gizmos.color = Color.red;
+    Gizmos.DrawWireSphere(transform.position, attackRange);
+
+    // Line to target player (green)
+    if (targetPlayer != null)
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, targetPlayer.position);
     }
 
-
-    // ========================
-    // GIZMOS
-    // ========================
-
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-
-
-        if (targetPlayer != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, targetPlayer.position);
-        }
-    }
-    public void ApplyKnockback(Vector3 force)
-    {
-        if (rb == null) return;
-
-
-        isKnockedBack = true;
-        knockbackTimer = knockbackDuration;
-
-
-        // Stop NavMesh movement WITHOUT disabling it
-        agent.isStopped = true;
-        agent.updatePosition = false;
-        agent.updateRotation = false;
-
-
-        // Apply physics force
-        rb.linearVelocity = Vector3.zero;
-        rb.AddForce(force, ForceMode.Impulse);
-
-
-        animator.SetBool("isFalling", true);
-    }
-
-
-    void CheckGrounded()
-    {
-        isGrounded = Physics.Raycast(
-            transform.position + Vector3.up * 0.2f,
-            Vector3.down,
-            groundCheckDistance,
-            groundLayer
-        );
-    }
-
-
-    void UpdateFallingAnimation()
-    {
-        animator.SetBool("isFalling", !isGrounded);
-
-
-        // Override other animations while airborne
-        if (!isGrounded)
-        {
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isRunning", false);
-            animator.SetBool("isAttacking", false);
-        }
-    }
+    // Ground check ray (blue)
+    Gizmos.color = Color.blue;
+    Gizmos.DrawRay(transform.position + Vector3.up * 0.2f, Vector3.down * groundCheckDistance);
+}
 }
