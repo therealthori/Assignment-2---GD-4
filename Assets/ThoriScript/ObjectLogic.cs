@@ -2,48 +2,80 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.Netcode;
 
-public class ObjectLogic : MonoBehaviour
+public class ObjectLogic : NetworkBehaviour
 {
+    [System.Serializable]
+    public class ThrowableItem
+    {
+        public string itemName;
+        public GameObject throwablePrefab;
+        public GameObject uiSlot;
+        public int currentAmount;
+        public int maxAmount;
+    }
+
     [Header("References")]
     public Transform cam;
     public Transform attackPoint;
-    public GameObject objectToThrow;
+    public TextMeshProUGUI ammoText;
 
-    [Header("Settings")]
-    public int totalThrows;
-    public float throwCooldown;
-    public TextMeshProUGUI ammoText;       // Optional: drag UI text here
+    [Header("Throwables")]
+    public ThrowableItem[] throwables;
+    public int selectedIndex = 0;
 
     [Header("Throwing")]
-    public KeyCode throwKey = KeyCode.Mouse0;
-    public float throwForce;
-    public float throwUpwardForce;
+    public float throwCooldown = 0.5f;
+    public float throwForce = 15f;
+    public float throwUpwardForce = 5f;
 
-    bool readyToThrow;
+    private bool readyToThrow = true;
 
     private void Start()
     {
-        readyToThrow = true;
-        UpdateAmmoUI();
+        UpdateUI();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(throwKey) && readyToThrow && totalThrows > 0)
+        HandleSelection();
+
+        if (Input.GetKeyDown(KeyCode.Mouse0) && readyToThrow)
         {
             Throw();
         }
     }
 
-    private void Throw()
+    void HandleSelection()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectThrowable(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SelectThrowable(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SelectThrowable(2);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) SelectThrowable(3);
+    }
+
+    void SelectThrowable(int index)
+    {
+        if (index >= 0 && index < throwables.Length)
+        {
+            selectedIndex = index;
+            UpdateUI();
+        }
+    }
+
+    void Throw()
+    {
+        ThrowableItem current = throwables[selectedIndex];
+
+        if (current.currentAmount <= 0) return;
+
         readyToThrow = false;
 
-        GameObject projectile = Instantiate(objectToThrow, attackPoint.position, cam.rotation);
-        Rigidbody projectileRb = projectile.GetComponent<Rigidbody>();
+        GameObject projectile = Instantiate(current.throwablePrefab, attackPoint.position, cam.rotation);
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
 
-        Vector3 forceDirection = cam.transform.forward;
+        Vector3 forceDirection = cam.forward;
 
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, 500f))
@@ -52,26 +84,50 @@ public class ObjectLogic : MonoBehaviour
         }
 
         Vector3 forceToAdd = forceDirection * throwForce + transform.up * throwUpwardForce;
-        projectileRb.AddForce(forceToAdd, ForceMode.Impulse);
 
-        // ✅ Add spin so it looks like a real thrown bottle
-        projectileRb.AddTorque(Random.insideUnitSphere * 10f, ForceMode.Impulse);
+        rb.AddForce(forceToAdd, ForceMode.Impulse);
+        rb.AddTorque(Random.insideUnitSphere * 10f, ForceMode.Impulse);
 
-        totalThrows--;
-        UpdateAmmoUI();
+        current.currentAmount--;
+        throwables[selectedIndex] = current;
 
+        UpdateUI();
         Invoke(nameof(ResetThrow), throwCooldown);
     }
 
-    private void ResetThrow()
+    void ResetThrow()
     {
         readyToThrow = true;
     }
 
-    void UpdateAmmoUI()
+    public void AddThrowable(int index, int amount = 1)
     {
-        if (ammoText != null)
-            ammoText.text = "Molotovs: " + totalThrows;
+        if (index < 0 || index >= throwables.Length) return;
+
+        throwables[index].currentAmount += amount;
+        throwables[index].currentAmount = Mathf.Clamp(
+            throwables[index].currentAmount,
+            0,
+            throwables[index].maxAmount
+        );
+
+        UpdateUI();
     }
 
+    void UpdateUI()
+    {
+        for (int i = 0; i < throwables.Length; i++)
+        {
+            if (throwables[i].uiSlot != null)
+            {
+                throwables[i].uiSlot.SetActive(throwables[i].currentAmount > 0);
+            }
+        }
+
+        if (ammoText != null)
+        {
+            ThrowableItem current = throwables[selectedIndex];
+            ammoText.text = current.itemName + ": " + current.currentAmount;
+        }
+    }
 }

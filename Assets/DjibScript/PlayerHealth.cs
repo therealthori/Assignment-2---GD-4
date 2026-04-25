@@ -153,4 +153,10 @@ void Update()
 
         Debug.Log("❌ Invincibility ended");
     }
+
+    public void AddHealth(float amount)
+    {
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    }
 }

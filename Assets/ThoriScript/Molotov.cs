@@ -1,7 +1,8 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Molotov : MonoBehaviour
+public class Molotov : NetworkBehaviour
 {
     [Header("Fire Settings")]
     public float fireDamage = 5f;           
@@ -53,9 +54,14 @@ public class Molotov : MonoBehaviour
             foreach (Collider hit in hits)
             {
                 AIEnemy enemy = hit.GetComponent<AIEnemy>();
+                PlayerHealth player = hit.GetComponent<PlayerHealth>();
                 if (enemy != null)
                 {
                     enemy.TakeDamage(fireDamage);
+                }
+                if (player != null)
+                {
+                    player.TakeDamage(fireDamage);
                 }
             }
 
